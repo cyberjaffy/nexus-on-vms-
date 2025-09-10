@@ -1,4 +1,4 @@
-name: Deploy Nexus to AWS VM
+name: Deploy Nexus OSS via Docker to AWS VM
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Nexus on AWS VM
+      - name: Install Docker and deploy Nexus OSS on AWS VM
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.VM_HOST }}
@@ -20,13 +20,50 @@ jobs:
           key: ${{ secrets.VM_KEY }}
           port: 22
           script: |
-            sudo apt update -y
-            sudo apt install -y wget openjdk-8-jre-headless
-            wget https://download.sonatype.com/nexus/3/nexus-3.62.0-01-unix.tar.gz
-            tar -xvf nexus-3.59.0-02-unix.tar.gz
-            sudo mv nexus-3.59.0-02 /opt/nexus
-            sudo useradd -r -m -d /opt/nexus nexus
-            sudo chown -R nexus:nexus /opt/nexus
-            sudo -u nexus /opt/nexus/bin/nexus start
-            sudo ufw allow 8081/tcp
-            sudo ufw reload
+            set -euo pipefail
+
+            # Update and install Docker if missing
+            sudo apt-get update -y
+            sudo apt-get install -y docker.io curl
+
+            # Start and enable Docker
+            sudo systemctl start docker
+            sudo systemctl enable docker
+
+            # Stop and remove old Nexus container if it exists
+            sudo docker stop nexus || true
+            sudo docker rm nexus || true
+
+            # Create persistent data dir
+            sudo mkdir -p /opt/nexus-data
+            sudo chown -R $USER:$USER /opt/nexus-data
+
+            # Pull latest Nexus OSS image
+            sudo docker pull sonatype/nexus3:latest
+
+            # Run Nexus container
+            sudo docker run -d --name nexus \
+              -p 8081:8081 \
+              -v /opt/nexus-data:/nexus-data \
+              sonatype/nexus3:latest
+
+            # Allow Nexus port in firewall (if UFW is used)
+            sudo ufw allow 8081/tcp || true
+            sudo ufw reload || true
+
+            # Wait for Nexus to initialize a bit
+            echo "Waiting 30s for Nexus to write admin password..."
+            sleep 30
+
+            # Print Nexus container status
+            sudo docker ps -a
+
+            # Show initial admin password (first-time setup)
+            if sudo docker exec nexus test -f /nexus-data/admin.password; then
+              echo "============================"
+              echo "Initial Nexus admin password:"
+              sudo docker exec nexus cat /nexus-data/admin.password
+              echo "============================"
+            else
+              echo "Admin password file not found yet. Try again in 1-2 minutes."
+            fi

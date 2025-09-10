@@ -20,13 +20,13 @@ jobs:
           key: ${{ secrets.VM_KEY }}
           port: 22
           script: |
-            sudo yum update -y
-            sudo yum install -y wget java-1.8.0-openjdk
-            wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
-            tar -xvf latest-unix.tar.gz
-            sudo mv nexus-3.* /opt/nexus
-            sudo useradd nexus
+            sudo apt update -y
+            sudo apt install -y wget openjdk-8-jre-headless
+            wget https://download.sonatype.com/nexus/3/nexus-3.59.0-02-unix.tar.gz
+            tar -xvf nexus-3.59.0-02-unix.tar.gz
+            sudo mv nexus-3.59.0-02 /opt/nexus
+            sudo useradd -r -m -d /opt/nexus nexus
             sudo chown -R nexus:nexus /opt/nexus
-            sudo /opt/nexus/bin/nexus start
-            sudo firewall-cmd --permanent --add-port=8081/tcp
-            sudo firewall-cmd --reload
+            sudo -u nexus /opt/nexus/bin/nexus start
+            sudo ufw allow 8081/tcp
+            sudo ufw reload

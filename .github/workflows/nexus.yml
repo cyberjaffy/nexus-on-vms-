@@ -1,0 +1,32 @@
+name: Deploy Nexus to AWS VM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Nexus on AWS VM
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_KEY }}
+          port: 22
+          script: |
+            sudo yum update -y
+            sudo yum install -y wget java-1.8.0-openjdk
+            wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+            tar -xvf latest-unix.tar.gz
+            sudo mv nexus-3.* /opt/nexus
+            sudo useradd nexus
+            sudo chown -R nexus:nexus /opt/nexus
+            sudo /opt/nexus/bin/nexus start
+            sudo firewall-cmd --permanent --add-port=8081/tcp
+            sudo firewall-cmd --reload

@@ -53,7 +53,7 @@ jobs:
 
             # Wait for Nexus to initialize a bit
             echo "Waiting 30s for Nexus to write admin password..."
-            sleep 30
+            sleep 200
 
             # Print Nexus container status
             sudo docker ps -a

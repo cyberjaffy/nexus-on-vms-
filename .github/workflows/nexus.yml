@@ -22,7 +22,7 @@ jobs:
           script: |
             sudo apt update -y
             sudo apt install -y wget openjdk-8-jre-headless
-            wget https://download.sonatype.com/nexus/3/nexus-3.59.0-02-unix.tar.gz
+            wget https://download.sonatype.com/nexus/3/nexus-3.62.0-01-unix.tar.gz
             tar -xvf nexus-3.59.0-02-unix.tar.gz
             sudo mv nexus-3.59.0-02 /opt/nexus
             sudo useradd -r -m -d /opt/nexus nexus

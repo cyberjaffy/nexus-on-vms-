@@ -58,6 +58,9 @@ This documentation describes the process and technical steps I followed to deplo
 - **URL:** `http://<your-vm-public-ip>:8081`
 - **Admin password:** Check the workflow log output under "Initial Nexus admin password" or SSH to your VM and view the file `/opt/nexus-data/admin.password`.
 
+<img width="2880" height="1800" alt="image" src="https://github.com/user-attachments/assets/7c97ead1-df14-4711-adaa-dc07bd330830" />
+
+
 ---
 
 ## Lessons Learned & Tips

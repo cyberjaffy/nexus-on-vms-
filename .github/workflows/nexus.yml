@@ -36,7 +36,7 @@ jobs:
 
             # Create persistent data dir
             sudo mkdir -p /opt/nexus-data
-            sudo chown -R $200:$200 /opt/nexus-data
+            sudo chown -R 200:200 /opt/nexus-data
 
             # Pull latest Nexus OSS image
             sudo docker pull sonatype/nexus3:latest
